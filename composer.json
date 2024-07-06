@@ -1,10 +1,14 @@
 {
-    "name": "polar/lamp-stack-roles",
-    "type": "composer-plugin",
+    "name": "admin/lamp-stack-roles",
+    "description": "sample github action project",
+    "type": "project",
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
+    "license": "proprietary",
     "autoload": {
         "psr-4": {
             "Polar\\LampStackRoles\\": "src/"
         }
-    },
-    "require": {}
+    }
 }
