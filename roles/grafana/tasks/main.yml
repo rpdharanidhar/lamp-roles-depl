@@ -1,0 +1,9 @@
+---
+- name: Run Grafana container
+  command: >
+    docker run -d
+    -p 3000:3000
+    --name grafana
+    --restart unless-stopped 
+    -v grafana_data:/var/lib/grafana
+    grafana/grafana:latest

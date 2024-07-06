@@ -1,0 +1,208 @@
+---
+# - name: Update apt package cache
+#   apt:
+#     update_cache: yes
+#   become: yes
+#   ignore_errors: yes
+
+# - name: Upgrade all packages
+#   apt:
+#     upgrade: yes
+#     autoremove: yes
+#   become: yes
+#   ignore_errors: yes
+
+# - name: Install PyMySQL
+#   pip:
+#     name: pymysql
+#     state: present
+
+# - name: Enable mysql
+#   ansible.builtin.shell: sudo systemctl start mysql
+#   become: yes
+
+# - name: Start mysql
+#   ansible.builtin.shell: sudo systemctl enable mysql
+#   become: yes
+  
+# - name: Update apt package cache
+#   apt:
+#     update_cache: yes
+#   become: yes
+#   ignore_errors: yes
+
+# - name: Sets the root password 
+#   mysql_user:
+#     user: root
+#     login_user: root
+#     login_password: "{{ mysql_root_password }}"
+#     login_unix_socket: /var/run/mysqld/mysqld.sock
+
+# - name: Create a database
+#   become: true
+#   mysql_db:
+#     name: "{{ mysql_db }}"
+#     state: present
+#     login_user: root
+#     login_password: "{{ mysql_root_password }}"
+
+# - name: Create a MySQL user
+#   mysql_user:
+#     name: "{{ mysql_user }}"
+#     password: "{{ mysql_user_password }}"
+#     priv: "{{ mysql_db }}.*:ALL"
+#     state: present
+#     login_user: root
+#     login_password: "{{ mysql_root_password }}"
+
+# - name: Create MySQL database
+#   become: true
+#   mysql_db:
+#     login_user: root
+#     login_password: "{{ mysql_root_password }}"
+#     name: "{{ mysql_db }}"
+#     state: present
+
+# - name: Create 'users' table
+#   become: true
+#   mysql_query:
+#     login_unix_socket: /var/run/mysqld/mysqld.sock
+#     login_user: root
+#     login_password: "{{ mysql_root_password }}"
+#     mysql_db: "{{ mysql_db }}"
+#     query: >
+#       CREATE TABLE IF NOT EXISTS people.users (
+#         email VARCHAR(255) PRIMARY KEY,
+#         password VARCHAR(255) NOT NULL
+#       )
+
+# - name: Insert data into MySQL table
+#   mysql_query:
+#     login_user: "{{ mysql_user }}"
+#     login_password: "{{ mysql_user_password }}"
+#     login_host: localhost
+#     login_port: 3306
+#     login_db: "{{ mysql_db }}"
+#     query: "INSERT IGNORE INTO people.users (email, password) VALUES ('user@gmail.com', 'user@1234');"
+
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+    autoremove: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install MySQL server
+  apt:
+    name: mysql-server
+    state: present
+
+- name: Ensure MySQL is running
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Install PyMySQL
+  pip:
+    name: pymysql
+    state: present
+
+- name: Set root password and apply security settings
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mysql_root_password }}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  become: yes
+  become_user: root
+
+- name: Remove anonymous users
+  mysql_user:
+    name: ''
+    host: localhost
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  become: yes
+  become_user: root
+
+- name: Disallow root login remotely
+  mysql_user:
+    name: root
+    host: '{{ ansible_hostname }}'
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  become: yes
+  become_user: root
+
+- name: Remove test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  become: yes
+  become_user: root
+
+- name: Reload privilege tables
+  mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    query: "FLUSH PRIVILEGES"
+  become: yes
+  become_user: root
+
+- name: Create a new MySQL user
+  mysql_user:
+    name: '{{ mysql_user }}'
+    password: '{{ mysql_user_password }}'
+    priv: '*.*:ALL,GRANT'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_root_password }}'
+  become: yes
+  become_user: root
+
+- name: Create a database
+  mysql_db:
+    name: '{{ mysql_db }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_user_password }}'
+  become: yes
+  become_user: root 
+
+- name: Create 'users' table
+  mysql_query:
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_user_password }}"
+    login_host: localhost
+    login_port: 3306
+    query: >
+      CREATE TABLE IF NOT EXISTS {{ mysql_db }}.users (
+        email VARCHAR(255) PRIMARY KEY,
+        password VARCHAR(255) NOT NULL
+      )
+  become: yes
+  become_user: root
+
+- name: Insert data into MySQL table
+  mysql_query:
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_user_password }}"
+    login_host: localhost
+    login_port: 3306
+    query: >
+      INSERT IGNORE INTO {{ mysql_db }}.users (email, password)
+      VALUES ('user@gmail.com', 'user@1234')
+  become: yes
+  become_user: root

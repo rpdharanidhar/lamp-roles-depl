@@ -1,0 +1,32 @@
+---
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Upgrade all packages
+  apt:
+    upgrade: yes
+    autoremove: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Download Helm install script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+    dest: "/tmp/get-helm.sh"
+  become: yes
+  ignore_errors: yes
+
+- name: Set execute permissions on the script
+  ansible.builtin.file:
+    path: "/tmp/get-helm.sh"
+    mode: 'u+x'
+  become: yes
+  ignore_errors: yes
+
+- name: Run the Helm install script
+  ansible.builtin.command: "/tmp/get-helm.sh"
+  become: yes
+  ignore_errors: yes

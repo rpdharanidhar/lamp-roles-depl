@@ -1,0 +1,89 @@
+
+PLAY [Run the Ansible with the Roles] ******************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [server1]
+
+TASK [mysql : Update apt package cache] ****************************************
+ok: [server1]
+
+TASK [mysql : Upgrade all packages] ********************************************
+ok: [server1]
+
+TASK [mysql : Install MySQL server] ********************************************
+ok: [server1]
+
+TASK [mysql : Ensure MySQL is running] *****************************************
+ok: [server1]
+
+TASK [mysql : Install PyMySQL] *************************************************
+ok: [server1]
+
+TASK [mysql : Set root password and apply security settings] *******************
+changed: [server1]
+
+TASK [mysql : Remove anonymous users] ******************************************
+ok: [server1]
+
+TASK [mysql : Disallow root login remotely] ************************************
+ok: [server1]
+
+TASK [mysql : Remove test database] ********************************************
+ok: [server1]
+
+TASK [mysql : Reload privilege tables] *****************************************
+ok: [server1]
+
+TASK [mysql : Create a new MySQL user] *****************************************
+changed: [server1]
+
+TASK [mysql : Create a database] ***********************************************
+ok: [server1]
+
+TASK [mysql : Create 'users' table] ********************************************
+changed: [server1]
+
+TASK [mysql : Insert data into MySQL table] ************************************
+ok: [server1]
+
+TASK [apache : Update apt package cache] ***************************************
+ok: [server1]
+
+TASK [apache : Upgrade all packages] *******************************************
+ok: [server1]
+
+TASK [apache : Install Apache] *************************************************
+ok: [server1]
+
+TASK [apache : Start Apache Service] *******************************************
+ok: [server1]
+
+TASK [apache : Start Apache Service in background] *****************************
+ok: [server1]
+
+TASK [apache : Update apt package cache] ***************************************
+ok: [server1]
+
+TASK [apache : Ensure /var/www/html directory exists and set permissions] ******
+ok: [server1]
+
+TASK [apache : Copy index.html and index.php files] ****************************
+changed: [server1] => (item={'src': 'login.php', 'dest': 'login.php'})
+ok: [server1] => (item={'src': 'index.html', 'dest': 'index.html'})
+ok: [server1] => (item={'src': 'info.php', 'dest': 'info.php'})
+ok: [server1] => (item={'src': 'index.php', 'dest': 'index.php'})
+ok: [server1] => (item={'src': 'basic.php', 'dest': 'basic.php'})
+ok: [server1] => (item={'src': 'basic.html', 'dest': 'basic.html'})
+
+TASK [apache : Restart Apache Service] *****************************************
+ok: [server1]
+
+TASK [apache : Execute update command] *****************************************
+changed: [server1]
+
+TASK [apache : Restart Apache Service] *****************************************
+ok: [server1]
+
+PLAY RECAP *********************************************************************
+server1                    : ok=26   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

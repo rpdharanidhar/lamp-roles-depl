@@ -1,0 +1,7 @@
+- name: Example Playbook
+  hosts: localhost
+  vars_files:
+    - secret.yaml
+  tasks:
+    - debug:
+        msg: "The MySQL root password is {{ mysql_root_password }}"

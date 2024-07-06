@@ -1,0 +1,110 @@
+---
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Upgrade all packages
+  apt:
+    upgrade: yes
+    autoremove: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install prerequisites
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+
+- name: Download Kubernetes GPG key
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key"
+    dest: "/tmp/kubernetes-apt-keyring.gpg"
+  become: yes
+  ignore_errors: yes
+
+# - name: Install Kubernetes GPG key
+#   # ansible.builtin.command: "sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+#   ansible.builtin.command: "yes | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-apt-keyring.gpg"
+#   become: yes
+#   ignore_errors: yes
+
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Remove deprecated Jenkins keyring file
+  file:
+    path: /etc/apt/trusted.gpg.d/jenkins.gpg
+    state: absent
+
+- name: Ensure /etc/apt/keyrings directory exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+
+- name: Download and add Kubernetes apt key
+  command: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+  args:
+    creates: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+
+- name: Remove old Kubernetes repository file
+  file:
+    path: /etc/apt/sources.list.d/apt_kubernetes_io.list
+    state: absent
+  ignore_errors: yes
+
+# - name: Add Kubernetes apt repository
+#   copy:
+#     content: 'deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-jammy main'
+#     dest: /etc/apt/sources.list.d/kubernetes.list
+#     mode: '0644'
+#   ignore_errors: yes
+    
+- name: Set permissions for Kubernetes apt key
+  file:
+    path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    mode: '0644'
+
+- name: Add Kubernetes apt repository
+  copy:
+    content: 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /'
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    mode: '0644'
+  become: yes
+  ignore_errors: yes
+
+- name: Update apt package cache again
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install kubectl
+  apt:
+    name: kubectl
+    state: present
+
+- name: Update apt package cache
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: Update package lists after adding repository
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install kubectl
+  ansible.builtin.apt:
+    name: kubectl
+    state: present

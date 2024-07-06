@@ -1,0 +1,83 @@
+---
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Upgrade all packages
+  apt:
+    upgrade: yes
+    autoremove: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Install Apache
+  package:
+    name: apache2
+    state: present
+  become: yes
+  # ignore_errors: yes
+
+- name: Start Apache Service
+  service:
+    name: apache2
+    state: started
+    enabled: true
+  become: yes
+
+- name: Start Apache Service in background
+  ansible.builtin.systemd:
+    name: apache2
+    state: started
+    no_block: yes
+  become: yes
+
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+  become: yes
+  ignore_errors: yes
+
+- name: Ensure /var/www/html directory exists and set permissions
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Copy index.html and index.php files
+  copy:
+    src: "{{ item.src }}"
+    dest: "/var/www/html/{{ item.dest }}"
+    owner: www-data
+    group: www-data
+    mode: 0644
+  with_items:
+    - { src: 'login.php', dest: 'login.php' }
+    - { src: 'index.html', dest: 'index.html' }
+    - { src: 'info.php', dest: 'info.php' }
+    - { src: 'index.php', dest: 'index.php' }
+    - { src: 'basic.php', dest: 'basic.php' }
+    - { src: 'basic.html', dest: 'basic.html' }
+  become: yes
+  ignore_errors: yes
+
+- name: Restart Apache Service
+  service:
+    name: apache2
+    state: started
+    enabled: true
+  become: yes
+
+- name: Execute update command
+  ansible.builtin.shell:
+    cmd: sudo a2enmod php7.4
+  become: yes
+
+- name: Restart Apache Service
+  service:
+    name: apache2
+    state: started
+    enabled: true
+  become: yes

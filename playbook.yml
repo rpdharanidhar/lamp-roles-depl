@@ -1,0 +1,30 @@
+---
+- name: Run the Ansible with the Roles
+  # hosts: localhost
+  hosts: test_servers
+  gather_facts: yes
+  become_method: sudo
+  
+  vars:
+    mysql_root_password: root
+    mysql_user: dharani
+    mysql_user_password: root
+    mysql_db: people
+    ansible_become_pass: mg
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  
+    vars_files:
+    - secret.yaml
+
+  roles:
+    - common
+    - oci_cli
+    - jenkins
+    - docker
+    - helm
+    - kubectl
+    - sonarqube
+    - grafana
+    - php
+    - mysql
+    - apache
