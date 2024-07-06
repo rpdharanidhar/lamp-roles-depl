@@ -1,0 +1,10 @@
+{
+    "name": "polar/lamp-stack-roles",
+    "type": "composer-plugin",
+    "autoload": {
+        "psr-4": {
+            "Polar\\LampStackRoles\\": "src/"
+        }
+    },
+    "require": {}
+}
